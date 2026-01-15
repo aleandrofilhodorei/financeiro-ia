@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Financeiro IA</title>
+
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Config Supabase -->
+  <script src="config.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f8fafc;
+    }
+    header {
+      background: #1d4ed8;
+      color: white;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 1rem;
+    }
+    .card {
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      box-shadow: 0 0 6px rgba(0,0,0,0.08);
+    }
+    input, select, button {
+      width: 100%;
+      padding: 0.6rem;
+      margin-top: 0.4rem;
+      box-sizing: border-box;
+    }
+    button {
+      background: #1d4ed8;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    button:hover {
+      background: #2563eb;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #e5e7eb;
+      padding: 0.5rem;
+      text-align: left;
+    }
+    th {
+      background: #f1f5f9;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <strong>Financeiro IA</strong>
+  <button onclick="logout()">Sair</button>
+</header>
+
+<div class="container">
+
+  <!-- NOVA MOVIMENTAÇÃO -->
+  <div class="card">
+    <h3>Nova movimentação</h3>
+
+    <select id="tipo">
+      <option value="entrada">Entrada</option>
+      <option value="saida">Saída</option>
+    </select>
+
+    <input type="text" id="categoria" placeholder="Categoria (ex: Aluguel, Combustível)" />
+    <input type="number" id="valor" placeholder="Valor" />
+    <input type="text" id="observacao" placeholder="Observação (opcional)" />
+
+    <button onclick="salvarMovimentacao()">Salvar</button>
+  </div>
+
+  <!-- LISTA -->
+  <div class="card">
+    <h3>Movimentações</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Tipo</th>
+          <th>Categoria</th>
+          <th>Valor</th>
+          <th>Obs</th>
+        </tr>
+      </thead>
+      <tbody id="lista"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+  let userId = null;
+
+  // Verifica usuário logado
+  async function carregarUsuario() {
+    const { data } = await supabase.auth.getUser();
+
+    if (!data.user) {
+      window.location.href = "login.html";
+      return;
+    }
+
+    userId = data.user.id;
+  }
+
+  // Salvar movimentação
+  async function salvarMovimentacao() {
+    const tipo = document.getElementById("tipo").value;
+    const categoria = document.getElementById("categoria").value;
+    const valor = document.getElementById("valor").value;
+    const observacao = document.getElementById("observacao").value;
+
+    if (!categoria || !valor) {
+      alert("Preencha categoria e valor");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("fin_movimentacoes")
+      .insert({
+        user_id: userId,
+        tipo,
+        categoria,
+        valor,
+        observacao
+      });
+
+    if (error) {
+      alert(error.message);
+    } else {
+      document.getElementById("categoria").value = "";
+      document.getElementById("valor").value = "";
+      document.getElementById("observacao").value = "";
+      listarMovimentacoes();
+    }
+  }
+
+  // Listar movimentações
+  async function listarMovimentacoes() {
+    const { data, error } = await supabase
+      .from("fin_movimentacoes")
+      .select("*")
+      .order("data", { ascending: false });
+
+    const lista = document.getElementById("lista");
+    lista.innerHTML = "";
+
+    if (data) {
+      data.forEach(m => {
+        lista.innerHTML += `
+          <tr>
+            <td>${m.data}</td>
+            <td>${m.tipo}</td>
+            <td>${m.categoria}</td>
+            <td>R$ ${Number(m.valor).toFixed(2)}</td>
+            <td>${m.observacao || ""}</td>
+          </tr>
+        `;
+      });
+    }
+  }
+
+  // Logout
+  async function logout() {
+    await supabase.auth.signOut();
+    window.location.href = "login.html";
+  }
+
+  carregarUsuario().then(listarMovimentacoes);
+</script>
+
+</body>
+</html>
