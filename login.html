@@ -1,91 +1,79 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>Login Financeiro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Supabase JS -->
+  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Configuração do Supabase -->
   <script src="config.js"></script>
 
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f1f5f9;
+      background: #f2f4f8;
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       height: 100vh;
-      margin: 0;
     }
-    .box {
+    .login-box {
       background: white;
-      padding: 2rem;
-      width: 100%;
-      max-width: 360px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 30px;
+      border-radius: 10px;
+      width: 320px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
     }
     h2 {
       text-align: center;
     }
-    input {
+    input, button {
       width: 100%;
-      padding: 0.7rem;
-      margin-top: 0.6rem;
-      box-sizing: border-box;
+      padding: 12px;
+      margin-top: 10px;
     }
     button {
-      width: 100%;
-      padding: 0.7rem;
-      margin-top: 1rem;
-      background: #1d4ed8;
+      background: #1f4fd8;
       color: white;
       border: none;
+      border-radius: 5px;
       cursor: pointer;
-      border-radius: 4px;
     }
     button:hover {
-      background: #2563eb;
-    }
-    #msg {
-      margin-top: 1rem;
-      color: red;
-      text-align: center;
+      background: #163db5;
     }
   </style>
 </head>
 
 <body>
-  <div class="box">
+
+  <div class="login-box">
     <h2>Login Financeiro</h2>
 
-    <input type="email" id="email" placeholder="Email" />
-    <input type="password" id="password" placeholder="Senha" />
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="senha" placeholder="Senha">
 
     <button onclick="login()">Entrar</button>
-
-    <p id="msg"></p>
   </div>
 
-  <script>
-    async function login() {
-      const emailValue = document.getElementById("email").value;
-      const passwordValue = document.getElementById("password").value;
+<script>
+  async function login() {
+    const email = document.getElementById("email").value;
+    const senha = document.getElementById("senha").value;
 
-      const { error } = await supabase.auth.signInWithPassword({
-        email: emailValue,
-        password: passwordValue
-      });
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: senha
+    });
 
-      if (error) {
-        document.getElementById("msg").innerText = error.message;
-      } else {
-        window.location.href = "financeiro.html";
-      }
+    if (error) {
+      alert("Erro no login: " + error.message);
+    } else {
+      window.location.href = "financeiro.html";
     }
-  </script>
+  }
+</script>
+
 </body>
 </html>
